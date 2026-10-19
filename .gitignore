@@ -1,0 +1,26 @@
+# Operating system files
+.DS_Store
+
+# Environment files
+.env
+.env.*
+
+# Python files
+__pycache__/
+*.py[cod]
+*.ipynb_checkpoints/
+venv/
+.venv/
+
+# Node.js files
+node_modules/
+npm-debug.log*
+
+# IDE settings
+.idea/
+.vscode/
+
+# Build files
+dist/
+build/
+target/
