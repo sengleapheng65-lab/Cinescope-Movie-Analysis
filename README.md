@@ -3,13 +3,20 @@
 ## Authors
 
 - Author #1: Leapheng Seng — `sengleapheng65-lab`
-- Author #2: Ethan Nguyen — ``
+- Author #2: Ethan Nguyen — `ethansnnguyen`
 
 ## Project Description
 
 CineScope is a data analysis project that explores movie ratings, genres, popularity, and release years. The project will collect movie information from a public movie API or dataset. Users will be able to explore movie information and identify highly rated or popular films. The collected data will be analyzed to find trends and relationships between movie characteristics and ratings. CineScope will present the results through clear charts and visualizations to help users discover movies and understand movie trends.
 
 ## Project Outline/Plan
+
+- Create a simple and responsive homepage introducing the project
+- Collect and access movie data
+- Allow filterting by Genre, Release Year, Rating, Popularity, etc.
+- Display search results in an organized format
+- Include charts and graphs summarizing movie trends.
+- Create a responsive results page that will display movie information, charts, graphs, etc. 
 
 ### Interface Plan
 
@@ -25,7 +32,7 @@ We will collect movie data from a public movie API or dataset. The data will inc
 
 *Written by Author #2: Ethan Nguyen*
 
-We will analyze the movie data using Python and data analysis libraries. The analysis will compare movie ratings across genres, release years, and popularity levels. We will create bar charts showing the highest-rated genres, line graphs showing rating trends over time, and scatter plots comparing popularity with ratings. We will also identify the most popular and highest-rated movies in the dataset. These visualizations will help users understand patterns in movie ratings and make informed movie recommendations.
+We will analyze the movie data using Python libraries and packages. The analysis will compare movie ratings across genres, release years, and popularity levels. We will create bar charts showing the highest-rated genres, line graphs showing rating trends over time, and scatter plots comparing popularity with ratings. We will also identify the most popular and highest-rated movies in the dataset. 
 
 ## Technologies
 
