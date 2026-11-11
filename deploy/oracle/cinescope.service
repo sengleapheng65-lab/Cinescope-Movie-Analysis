@@ -1,0 +1,14 @@
+[Unit]
+Description=CineScope Flask application
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Cinescope-Movie-Analysis
+Environment=PATH=/home/ubuntu/Cinescope-Movie-Analysis/.venv/bin
+ExecStart=/home/ubuntu/Cinescope-Movie-Analysis/.venv/bin/gunicorn src.server:app --workers 2 --bind 127.0.0.1:8000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
