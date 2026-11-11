@@ -66,6 +66,21 @@ python -m src.data_collection --pages 2
 
 API credentials should never be committed to the repository.
 
+## Dataset Fields
+
+The generated movie dataset includes:
+
+- `title`, `genres`, and `overview`
+- `release_year` and `runtime`
+- `rating`, `vote_count`, and `popularity`
+- `director` and `poster_path`
+
+The dashboard calculates a Bayesian consensus ranking from rating and vote count.
+
+## Data Attribution
+
+Movie metadata and poster paths are supplied by [TMDB](https://www.themoviedb.org/). CineScope uses the TMDB API but is not endorsed or certified by TMDB. When the live dataset is used, retain appropriate TMDB attribution and follow the [TMDB API terms](https://www.themoviedb.org/api-terms-of-use).
+
 ## License
 
 This project is licensed under the MIT License.
