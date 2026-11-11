@@ -66,6 +66,16 @@ python -m src.data_collection --pages 2
 
 API credentials should never be committed to the repository.
 
+Run the Python dashboard server with:
+
+```bash
+python -m src.server
+```
+
+Then open <http://127.0.0.1:8000/>. The Flask API serves the movie dataset at `/api/movies` and reports its status at `/api/health`. It supports queries such as `/api/movies?search=nolan&min_rating=8&sort=consensus`.
+
+Additional Python endpoints include `/api/analytics` for decade and genre summaries and `/api/recommendations?title=Interstellar` for similar-film recommendations.
+
 ## Dataset Fields
 
 The generated movie dataset includes:
