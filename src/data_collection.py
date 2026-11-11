@@ -31,10 +31,24 @@ SAMPLE_MOVIES = [
     {"title": "Get Out", "genres": "Horror, Mystery, Thriller", "release_year": 2017, "rating": 7.6, "vote_count": 17000, "popularity": 64.8, "overview": "A young man uncovers an unsettling secret during a weekend visit."},
     {"title": "Toy Story", "genres": "Animation, Comedy, Family", "release_year": 1995, "rating": 8.0, "vote_count": 18000, "popularity": 77.5, "overview": "Toys come to life when their owner is away."},
 ]
+SAMPLE_METADATA = {
+    "The Shawshank Redemption": {"runtime": 142, "director": "Frank Darabont"},
+    "The Godfather": {"runtime": 175, "director": "Francis Ford Coppola"},
+    "The Dark Knight": {"runtime": 152, "director": "Christopher Nolan"},
+    "Spirited Away": {"runtime": 125, "director": "Hayao Miyazaki"},
+    "Parasite": {"runtime": 132, "director": "Bong Joon-ho"},
+    "Interstellar": {"runtime": 169, "director": "Christopher Nolan"},
+    "Get Out": {"runtime": 104, "director": "Jordan Peele"},
+    "Toy Story": {"runtime": 81, "director": "John Lasseter"},
+}
 
 
 def sample_dataframe() -> pd.DataFrame:
-    return pd.DataFrame(SAMPLE_MOVIES)
+    movies = pd.DataFrame(SAMPLE_MOVIES)
+    movies["runtime"] = movies["title"].map(lambda title: SAMPLE_METADATA[title]["runtime"])
+    movies["director"] = movies["title"].map(lambda title: SAMPLE_METADATA[title]["director"])
+    movies["poster_path"] = ""
+    return movies
 
 
 def collect_from_tmdb(token: str, pages: int) -> pd.DataFrame:
@@ -48,6 +62,18 @@ def collect_from_tmdb(token: str, pages: int) -> pd.DataFrame:
         )
         response.raise_for_status()
         for movie in response.json().get("results", []):
+            details_response = requests.get(
+                f"https://api.themoviedb.org/3/movie/{movie['id']}",
+                headers={"Authorization": f"Bearer {token}"},
+                params={"append_to_response": "credits"},
+                timeout=30,
+            )
+            details_response.raise_for_status()
+            details = details_response.json()
+            director = next(
+                (person.get("name", "") for person in details.get("credits", {}).get("crew", []) if person.get("job") == "Director"),
+                "",
+            )
             release_date = movie.get("release_date") or ""
             rows.append(
                 {
@@ -60,6 +86,9 @@ def collect_from_tmdb(token: str, pages: int) -> pd.DataFrame:
                     "rating": movie.get("vote_average"),
                     "vote_count": movie.get("vote_count"),
                     "popularity": movie.get("popularity"),
+                    "poster_path": movie.get("poster_path", ""),
+                    "runtime": details.get("runtime") or "",
+                    "director": director,
                     "overview": movie.get("overview", ""),
                 }
             )
@@ -82,6 +111,9 @@ def main() -> None:
         movies = collect_from_tmdb(token, args.pages)
     else:
         parser.error("Set TMDB_API_TOKEN or run with --sample")
+
+    if "poster_path" not in movies.columns:
+        movies["poster_path"] = ""
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     movies.to_csv(args.output, index=False)
