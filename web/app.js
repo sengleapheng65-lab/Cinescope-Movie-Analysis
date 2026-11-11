@@ -1,3 +1,4 @@
+// Offline fallback data keeps the interface usable when the Flask API is unavailable.
 const fallbackMovies = [
   {
     title: "The Shawshank Redemption",
@@ -77,8 +78,10 @@ const fallbackMovies = [
     overview: "Toys come to life when their owner is away.",
   },
 ];
+// `movies` holds the current API page; `currentShown` holds the filtered view.
 let movies = [];
 const $ = (id) => document.getElementById(id);
+// Parse quoted CSV fields so genres and overviews containing commas remain intact.
 function parseCsv(text) {
   const rows = [];
   let row = [];
@@ -116,6 +119,7 @@ function parseCsv(text) {
     ),
   );
 }
+// Attach UI event handlers after the dataset and DOM are ready.
 function setup() {
   if (!$('data-source')) document.querySelector('.status-pill')?.insertAdjacentHTML('beforeend', '<span id="data-source">LOADING DATA</span>');
   const genres = [
@@ -145,6 +149,7 @@ function setup() {
   setupNavbar();
   render();
 }
+// Navbar behavior: active sections, mobile menu, scroll state, and keyboard search.
 function setupNavbar() {
   const nav = document.querySelector(".topbar");
   const links = [...document.querySelectorAll(".topbar nav a")];
@@ -198,6 +203,7 @@ function setupNavbar() {
 }
 let currentPage = 1;
 const pageSize = 24;
+// Render cards, metrics, pagination, charts, and the recommendation panel.
 function render(resetPage = true) {
   if (resetPage) currentPage = 1;
   const query = ($("catalog-search")?.value || $("search").value).toLowerCase();
@@ -255,6 +261,7 @@ let serverPagination = null;
 let activeDecade = null;
 document.addEventListener('click', event => { const pageButton = event.target.closest('[data-page]'); if (!pageButton || pageButton.disabled) return; const totalPages = serverPagination?.total_pages || Math.max(1, Math.ceil(currentShown.length / pageSize)); currentPage = pageButton.dataset.page === 'next' ? Math.min(totalPages, currentPage + 1) : Math.max(1, currentPage - 1); if (serverPagination) requestServerMovies(); else render(false); document.getElementById('films')?.scrollIntoView({behavior:'smooth', block:'start'}); });
 document.addEventListener('click', event => { const bar = event.target.closest('[data-decade]'); if (!bar) return; activeDecade = Number(bar.dataset.decade); render(false); document.getElementById('films')?.scrollIntoView({behavior:'smooth', block:'start'}); });
+// Reset UI state, pagination, and the active decade selection.
 function resetFilters() {
   $("catalog-search").value = "";
   $("search").value = "";
@@ -283,6 +290,7 @@ function downloadDataset() {
   link.click();
   URL.revokeObjectURL(link.href);
 }
+// Populate the recommendation panel from the selected mode or similarity result.
 function updateRecommendation(shown, mode) {
   if (!shown.length) {
     const emptyRecommendationArt = document.querySelector('.rec-art');
@@ -344,6 +352,7 @@ function updateStats(shown) {
     ? `${Math.min(...years)}–${Math.max(...years)}`
     : "—";
 }
+// Build decade bars from the visible set; clicking a bar filters the catalog.
 function updateDecadeChart(shown) {
   const container = $("decade-bars");
   if (!container) return;

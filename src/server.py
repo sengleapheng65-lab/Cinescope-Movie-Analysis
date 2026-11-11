@@ -15,6 +15,7 @@ app = Flask(__name__, static_folder=str(WEB_PATH), static_url_path="/web")
 
 
 def load_movies() -> pd.DataFrame:
+    # Load the CSV on each request so newly collected data is immediately visible.
     movies = pd.read_csv(DATA_PATH).fillna("")
     ratings = pd.to_numeric(movies["rating"], errors="coerce").fillna(0)
     votes = pd.to_numeric(movies["vote_count"], errors="coerce").fillna(0)
@@ -23,6 +24,7 @@ def load_movies() -> pd.DataFrame:
     movies["release_year"] = pd.to_numeric(movies["release_year"], errors="coerce").fillna(0).astype(int)
     global_mean = ratings.mean() if len(movies) else 0
     minimum_votes = 50_000
+    # Bayesian consensus balances rating quality with confidence from vote count.
     movies["consensus"] = (votes / (votes + minimum_votes)) * ratings + (minimum_votes / (votes + minimum_votes)) * global_mean
     return movies
 
@@ -34,6 +36,7 @@ def home():
 
 @app.get("/api/movies")
 def movies_api():
+    # This endpoint handles catalog search, filters, sorting, and pagination.
     movies = load_movies()
     search = request.args.get("search", "").strip().lower()
     genre = request.args.get("genre", "").strip()
@@ -43,6 +46,7 @@ def movies_api():
     page = max(1, int(request.args.get("page", 1) or 1))
     page_size = min(100, max(1, int(request.args.get("page_size", 24) or 24)))
 
+    # Apply filters before pagination so total_pages describes the filtered set.
     if search:
         movies = movies[
             movies["title"].str.lower().str.contains(search, na=False)
@@ -55,6 +59,7 @@ def movies_api():
     if year_from:
         movies = movies[movies["release_year"] >= year_from]
 
+    # Map public query names to dataframe columns.
     sort_columns = {"consensus": "consensus", "rating": "rating", "votes": "vote_count", "vote_count": "vote_count", "popularity": "popularity", "year": "release_year", "title": "title"}
     sort_column = sort_columns.get(sort, "consensus")
     movies = movies.sort_values(sort_column, ascending=sort_column == "title")
@@ -73,6 +78,7 @@ def health():
 
 @app.get("/api/analytics")
 def analytics_api():
+    # Return aggregate data for the dashboard's Python/Pandas charts.
     movies = load_movies()
     decade_data = movies.assign(decade=(movies["release_year"] // 10 * 10)).groupby("decade", as_index=False).agg(
         average_rating=("rating", "mean"), movie_count=("title", "count")
@@ -89,6 +95,7 @@ def analytics_api():
 
 @app.get("/api/recommendations")
 def recommendations_api():
+    # Generate explainable recommendations from genre overlap, rating, and release era.
     title = request.args.get("title", "").strip().lower()
     movies = load_movies()
     if not title:
