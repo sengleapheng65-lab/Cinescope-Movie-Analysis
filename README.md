@@ -13,7 +13,7 @@ CineScope is a data analysis project that explores movie ratings, genres, popula
 
 - Create a simple and responsive homepage introducing the project
 - Collect and access movie data
-- Allow filterting by Genre, Release Year, Rating, Popularity, etc.
+- Allow filtering by Genre, Release Year, Rating, Popularity, etc.
 - Display search results in an organized format
 - Include charts and graphs summarizing movie trends.
 - Create a responsive results page that will display movie information, charts, graphs, etc. 
@@ -42,6 +42,29 @@ We will analyze the movie data using Python libraries and packages. The analysis
 - JavaScript
 - HTML and CSS
 - Public movie API or dataset
+
+## Getting Started
+
+Install the Python dependencies, create a local sample dataset, and generate the first chart:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python -m src.data_collection --sample
+python -m src.analysis
+```
+
+The sample workflow writes `data/movies.csv` and analysis results to `outputs/`.
+
+For live data, create a TMDB API Read Access Token and set it in your shell:
+
+```bash
+export TMDB_API_TOKEN="your-token-here"
+python -m src.data_collection --pages 2
+```
+
+API credentials should never be committed to the repository.
 
 ## License
 
