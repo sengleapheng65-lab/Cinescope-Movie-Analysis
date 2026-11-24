@@ -1,13 +1,16 @@
 genre,average_rating,movie_count
-Crime,8.6,2
-Drama,8.559999999999999,5
-Action,8.5,1
-Fantasy,8.5,1
-Adventure,8.4,1
-Science Fiction,8.4,1
-Animation,8.25,2
-Comedy,8.25,2
-Thriller,8.05,2
-Family,8.0,1
-Horror,7.6,1
-Mystery,7.6,1
+Animation,8.3405,2
+Family,8.207,1
+Genre 10402,8.207,1
+War,8.012,1
+Romance,7.584,1
+Fantasy,7.5488333333333335,6
+Crime,7.217333333333333,3
+Thriller,7.130166666666666,18
+Drama,7.010571428571429,7
+Comedy,6.877,4
+Adventure,6.803,10
+Mystery,6.729,4
+Horror,6.719733333333333,15
+Action,6.6206,15
+Science Fiction,6.471444444444444,9

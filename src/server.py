@@ -83,12 +83,19 @@ def analytics_api():
     decade_data = movies.assign(decade=(movies["release_year"] // 10 * 10)).groupby("decade", as_index=False).agg(
         average_rating=("rating", "mean"), movie_count=("title", "count")
     )
+    year_data = (
+        movies[movies["release_year"] > 0]
+        .groupby("release_year", as_index=False)
+        .agg(average_rating=("rating", "mean"), movie_count=("title", "count"))
+        .sort_values("release_year")
+    )
     genre_rows = movies.assign(genre=movies["genres"].str.split(", ")).explode("genre")
     genre_data = genre_rows.groupby("genre", as_index=False).agg(
         average_rating=("rating", "mean"), movie_count=("title", "count")
     ).sort_values("movie_count", ascending=False)
     return jsonify({
         "decades": decade_data.round(2).to_dict(orient="records"),
+        "years": year_data.round(2).to_dict(orient="records"),
         "genres": genre_data.round(2).to_dict(orient="records"),
     })
 

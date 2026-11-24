@@ -34,6 +34,27 @@ def main() -> None:
     plt.tight_layout()
     plt.savefig(args.output_dir / "average_rating_by_genre.png", dpi=150)
     plt.close()
+
+    year_summary = (
+        movies.assign(release_year=pd.to_numeric(movies["release_year"], errors="coerce"))
+        .dropna(subset=["release_year"])
+        .groupby("release_year", as_index=False)
+        .agg(average_rating=("rating", "mean"), movie_count=("title", "count"))
+        .sort_values("release_year")
+    )
+    year_summary["release_year"] = year_summary["release_year"].astype(int)
+    year_summary.to_csv(args.output_dir / "rating_trends_by_year.csv", index=False)
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(year_summary["release_year"], year_summary["average_rating"], marker="o", color="#f59e0b")
+    plt.title("Average Movie Rating by Release Year")
+    plt.xlabel("Release year")
+    plt.ylabel("Average rating")
+    plt.ylim(0, 10)
+    plt.grid(axis="y", alpha=0.2)
+    plt.tight_layout()
+    plt.savefig(args.output_dir / "rating_trends_by_year.png", dpi=150)
+    plt.close()
     print(f"Saved analysis outputs to {args.output_dir}")
 
 

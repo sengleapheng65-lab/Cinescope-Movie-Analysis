@@ -440,6 +440,14 @@ select {
   font: 10px "JetBrains Mono";
   font-style: normal;
 }
+.year-trend{margin-top:48px;padding-top:32px;border-top:1px solid var(--border)}
+.year-trend h3{margin:5px 0 0;font:700 21px "Plus Jakarta Sans"}
+.trend-chart{width:100%;overflow-x:auto}
+.trend-chart svg{display:block;width:100%;min-width:620px;height:auto}
+.trend-grid line{stroke:var(--border);stroke-width:1}
+.trend-grid text,.trend-labels text{fill:#64748b;font:10px "JetBrains Mono"}
+.trend-chart polyline{fill:none;stroke:var(--amber);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.trend-points circle{fill:var(--amber);stroke:var(--obsidian);stroke-width:2;cursor:pointer}
 .recommendations {
   background: var(--surface);
 }
