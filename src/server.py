@@ -19,6 +19,7 @@ def load_movies() -> pd.DataFrame:
     movies = pd.read_csv(DATA_PATH).fillna("")
     ratings = pd.to_numeric(movies["rating"], errors="coerce").fillna(0)
     votes = pd.to_numeric(movies["vote_count"], errors="coerce").fillna(0)
+    movies["popularity"] = pd.to_numeric(movies["popularity"], errors="coerce").fillna(0)
     movies["rating"] = ratings
     movies["vote_count"] = votes
     movies["release_year"] = pd.to_numeric(movies["release_year"], errors="coerce").fillna(0).astype(int)
@@ -106,11 +107,14 @@ def analytics_api():
     genre_data = genre_rows.groupby("genre", as_index=False).agg(
         average_rating=("rating", "mean"), movie_count=("title", "count")
     ).sort_values("movie_count", ascending=False)
+    popularity_rating = movies[["title", "rating", "popularity", "genres"]].copy()
+    popularity_rating["title"] = popularity_rating["title"].astype(str)
     return jsonify({
         "summary": rating_summary,
         "decades": decade_data.round(2).to_dict(orient="records"),
         "years": year_data.round(2).to_dict(orient="records"),
         "genres": genre_data.round(2).to_dict(orient="records"),
+        "popularity_rating": popularity_rating.round(2).to_dict(orient="records"),
     })
 
 
