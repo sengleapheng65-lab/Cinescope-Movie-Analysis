@@ -1056,6 +1056,16 @@ button,
   cursor: not-allowed;
   opacity: 0.35;
 }
+.rating-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0 30px}
+.rating-summary div{padding:18px;background:var(--subtle);border:1px solid var(--border);border-radius:5px}
+.rating-summary b{display:block;color:var(--amber);font:700 24px "JetBrains Mono"}
+.rating-summary span{display:block;margin-top:5px;color:var(--slate);font:10px "JetBrains Mono";text-transform:uppercase}
+.trend-legend{display:flex;gap:18px;margin:8px 0 2px;color:var(--slate);font:10px "JetBrains Mono"}
+.trend-legend i{display:inline-block;width:18px;margin-right:5px;border-top:3px solid currentColor;vertical-align:middle}.median-key i{border-top-style:dashed}
+.average-key{color:var(--amber)}.median-key{color:#60a5fa}
+.trend-chart polyline.average-line{stroke:var(--amber)}
+.trend-chart polyline.median-line{stroke:#60a5fa;stroke-width:3;stroke-dasharray:5 4}
+@media(max-width:600px){.rating-summary{grid-template-columns:1fr}}
 .movie-card {
   cursor: pointer;
 }

@@ -74,7 +74,7 @@ python -m src.server
 
 Then open <http://127.0.0.1:8000/>. The Flask API serves the movie dataset at `/api/movies` and reports its status at `/api/health`. It supports queries such as `/api/movies?search=nolan&min_rating=8&sort=consensus`.
 
-Additional Python endpoints include `/api/analytics` for yearly, decade, and genre summaries and `/api/recommendations?title=Interstellar` for similar-film recommendations. The analysis command also exports yearly rating data to `outputs/rating_trends_by_year.csv` and `outputs/rating_trends_by_year.png`.
+Additional Python endpoints include `/api/analytics` for overall rating statistics, yearly rating summaries, decade, and genre summaries, and `/api/recommendations?title=Interstellar` for similar-film recommendations. The analysis command exports overall statistics to `outputs/rating_summary.csv` and yearly average, median, and standard-deviation data to `outputs/rating_trends_by_year.csv` and `outputs/rating_trends_by_year.png`.
 
 ## Dataset Fields
 

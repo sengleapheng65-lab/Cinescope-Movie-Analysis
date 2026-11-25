@@ -80,20 +80,34 @@ def health():
 def analytics_api():
     # Return aggregate data for the dashboard's Python/Pandas charts.
     movies = load_movies()
+    ratings = movies["rating"].dropna()
+    rating_summary = {
+        "movie_count": int(len(ratings)),
+        "average_rating": round(float(ratings.mean()), 2) if len(ratings) else 0,
+        "median_rating": round(float(ratings.median()), 2) if len(ratings) else 0,
+        "rating_std": round(float(ratings.std()), 2) if len(ratings) > 1 else 0,
+    }
     decade_data = movies.assign(decade=(movies["release_year"] // 10 * 10)).groupby("decade", as_index=False).agg(
         average_rating=("rating", "mean"), movie_count=("title", "count")
     )
     year_data = (
         movies[movies["release_year"] > 0]
         .groupby("release_year", as_index=False)
-        .agg(average_rating=("rating", "mean"), movie_count=("title", "count"))
+        .agg(
+            average_rating=("rating", "mean"),
+            median_rating=("rating", "median"),
+            rating_std=("rating", "std"),
+            movie_count=("title", "count"),
+        )
         .sort_values("release_year")
     )
+    year_data["rating_std"] = year_data["rating_std"].fillna(0)
     genre_rows = movies.assign(genre=movies["genres"].str.split(", ")).explode("genre")
     genre_data = genre_rows.groupby("genre", as_index=False).agg(
         average_rating=("rating", "mean"), movie_count=("title", "count")
     ).sort_values("movie_count", ascending=False)
     return jsonify({
+        "summary": rating_summary,
         "decades": decade_data.round(2).to_dict(orient="records"),
         "years": year_data.round(2).to_dict(orient="records"),
         "genres": genre_data.round(2).to_dict(orient="records"),

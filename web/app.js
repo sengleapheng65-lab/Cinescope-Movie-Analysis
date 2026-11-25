@@ -229,9 +229,10 @@ function render(resetPage = true) {
   );
   updateStats(currentShown);
   updateDecadeChart(currentShown);
-  $("record-count").textContent = movies.length.toLocaleString();
+  const resultCount = serverPagination?.total_count ?? currentShown.length;
+  $("record-count").textContent = resultCount.toLocaleString();
   $("result-label").textContent =
-    `${currentShown.length} result${currentShown.length === 1 ? "" : "s"}${activeDecade ? ` · ${activeDecade}s` : ""}`;
+    `${resultCount} result${resultCount === 1 ? "" : "s"}${activeDecade ? ` · ${activeDecade}s` : ""}`;
   const totalPages = serverPagination?.total_pages || Math.max(1, Math.ceil(currentShown.length / pageSize));
   if (currentPage > totalPages) currentPage = totalPages;
   const pageStart = serverPagination ? (serverPagination.page - 1) * pageSize : (currentPage - 1) * pageSize;
@@ -334,7 +335,7 @@ function updateRecommendation(shown, mode) {
         : "TOP RATED MATCH";
 }
 function updateStats(shown) {
-  $("movie-count").textContent = shown.length;
+  $("movie-count").textContent = (serverPagination?.total_count ?? shown.length).toLocaleString();
   $("average-rating").textContent = shown.length
     ? (shown.reduce((s, m) => s + Number(m.rating), 0) / shown.length).toFixed(
         1,
@@ -384,8 +385,21 @@ function updateDecadeChart(shown) {
     : '<span class="chart-empty">No decade data for this selection.</span>';
 }
 function requestServerMovies() { const params = new URLSearchParams({search: $('catalog-search')?.value || $('search').value || '', genre: $('genre').value || '', min_rating: $('rating')?.value || '0', year_from: $('filter-year-slider')?.value || '1900', sort: $('sort').value || 'consensus', page: currentPage, page_size: pageSize}); fetch(`/api/movies?${params.toString()}`).then(response => response.ok ? response.json() : Promise.reject(new Error(`API request failed: ${response.status}`))).then(payload => { movies = payload.movies; serverPagination = payload; render(false); $('data-source').textContent = `PYTHON API · ${payload.total_count} RESULTS`; }).catch(error => console.warn('Server filtering unavailable; using local filtering.', error)); }
-function renderYearTrend(years) { const container = $('year-trend'); if (!container || !years.length) return; const width = 900, height = 250, left = 42, right = 20, top = 25, bottom = 42; const plotWidth = width - left - right, plotHeight = height - top - bottom; const x = i => left + (years.length === 1 ? plotWidth / 2 : i * plotWidth / (years.length - 1)); const y = rating => top + plotHeight - Number(rating) / 10 * plotHeight; const points = years.map((item, i) => `${x(i)},${y(item.average_rating)}`).join(' '); const step = Math.max(1, Math.ceil(years.length / 8)); const labels = years.map((item, i) => i % step === 0 || i === years.length - 1 ? `<text x="${x(i)}" y="${height - 12}" text-anchor="middle">${item.release_year}</text>` : '').join(''); const dots = years.map((item, i) => `<circle cx="${x(i)}" cy="${y(item.average_rating)}" r="4"><title>${item.release_year}: ${Number(item.average_rating).toFixed(2)} average (${item.movie_count} movies)</title></circle>`).join(''); container.innerHTML = `<div class="section-head"><div><small>YEARLY TREND · PYTHON / PANDAS</small><h3>Average rating by release year</h3></div><span>Hover over a point for details</span></div><div class="trend-chart"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Average rating by release year"><g class="trend-grid">${[2,4,6,8,10].map(value => `<line x1="${left}" x2="${width-right}" y1="${y(value)}" y2="${y(value)}"></line><text x="${left-10}" y="${y(value)+4}" text-anchor="end">${value}</text>`).join('')}</g><polyline points="${points}"></polyline><g class="trend-points">${dots}</g><g class="trend-labels">${labels}</g></svg></div>`; }
-function loadPythonAnalytics() { fetch('/api/analytics').then(response => response.ok ? response.json() : Promise.reject()).then(data => { const section = document.querySelector('.analytics'); if (!section || $('genre-analysis')) return; renderYearTrend(data.years || []); section.insertAdjacentHTML('beforeend', '<div id="genre-analysis" class="genre-analysis"><div class="section-head"><div><small>GENRE ANALYSIS · PYTHON / PANDAS</small><h3>Average rating by genre</h3></div><span>Top 8 genres by catalog volume</span></div><div id="genre-bars" class="genre-bars"></div></div>'); const topGenres = data.genres.slice(0, 8); const max = Math.max(...topGenres.map(item => Number(item.average_rating)), 1); $('genre-bars').innerHTML = topGenres.map(item => `<div class="genre-row"><span>${escapeHtml(item.genre)}</span><div><i style="width:${Number(item.average_rating) / max * 100}%"></i></div><b>${Number(item.average_rating).toFixed(1)}</b><small>${item.movie_count} films</small></div>`).join(''); }).catch(error => console.warn('Python analytics unavailable.', error)); }
+function renderYearTrend(years) {
+  const container = $('year-trend');
+  if (!container || !years.length) return;
+  const width = 900, height = 280, left = 48, right = 20, top = 25, bottom = 48;
+  const plotWidth = width - left - right, plotHeight = height - top - bottom;
+  const x = i => left + (years.length === 1 ? plotWidth / 2 : i * plotWidth / (years.length - 1));
+  const y = rating => top + plotHeight - Number(rating) / 10 * plotHeight;
+  const averagePoints = years.map((item, i) => `${x(i)},${y(item.average_rating)}`).join(' ');
+  const medianPoints = years.map((item, i) => `${x(i)},${y(item.median_rating)}`).join(' ');
+  const step = Math.max(1, Math.ceil(years.length / 8));
+  const labels = years.map((item, i) => i % step === 0 || i === years.length - 1 ? `<text x="${x(i)}" y="${height - 14}" text-anchor="middle">${item.release_year}</text>` : '').join('');
+  const dots = years.map((item, i) => `<circle cx="${x(i)}" cy="${y(item.average_rating)}" r="4"><title>${item.release_year}: average ${Number(item.average_rating).toFixed(2)}, median ${Number(item.median_rating).toFixed(2)}, standard deviation ${Number(item.rating_std).toFixed(2)} (${item.movie_count} movies)</title></circle>`).join('');
+  container.innerHTML = `<div class="section-head"><div><small>YEARLY TREND · PYTHON / PANDAS</small><h3>Average and median rating by release year</h3></div><span>Dots show average; hover for variability</span></div><div class="trend-legend"><span class="average-key"><i></i> Average</span><span class="median-key"><i></i> Median</span></div><div class="trend-chart"><svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Average and median rating by release year"><g class="trend-grid">${[2,4,6,8,10].map(value => `<line x1="${left}" x2="${width-right}" y1="${y(value)}" y2="${y(value)}"></line><text x="${left-10}" y="${y(value)+4}" text-anchor="end">${value}</text>`).join('')}</g><polyline class="average-line" style="stroke:#f59e0b" points="${averagePoints}"></polyline><polyline class="median-line" style="stroke:#60a5fa" points="${medianPoints}"></polyline><g class="trend-points">${dots}</g><g class="trend-labels">${labels}</g></svg></div>`;
+}
+function loadPythonAnalytics() { fetch('/api/analytics').then(response => response.ok ? response.json() : Promise.reject()).then(data => { const section = document.querySelector('.analytics'); if (!section || $('genre-analysis')) return; const summary = data.summary || {}; section.insertAdjacentHTML('afterbegin', `<div class="rating-summary"><div><b>${Number(summary.average_rating || 0).toFixed(2)}</b><span>Average rating</span></div><div><b>${Number(summary.median_rating || 0).toFixed(2)}</b><span>Median rating</span></div><div><b>${Number(summary.rating_std || 0).toFixed(2)}</b><span>Rating standard deviation</span></div></div>`); renderYearTrend(data.years || []); section.insertAdjacentHTML('beforeend', '<div id="genre-analysis" class="genre-analysis"><div class="section-head"><div><small>GENRE ANALYSIS · PYTHON / PANDAS</small><h3>Average rating by genre</h3></div><span>Top 8 genres by catalog volume</span></div><div id="genre-bars" class="genre-bars"></div></div>'); const topGenres = data.genres.slice(0, 8); const max = Math.max(...topGenres.map(item => Number(item.average_rating)), 1); $('genre-bars').innerHTML = topGenres.map(item => `<div class="genre-row"><span>${escapeHtml(item.genre)}</span><div><i style="width:${Number(item.average_rating) / max * 100}%"></i></div><b>${Number(item.average_rating).toFixed(1)}</b><small>${item.movie_count} films</small></div>`).join(''); }).catch(error => console.warn('Python analytics unavailable.', error)); }
 function escapeHtml(value) {
   return String(value).replace(
     /[&<>'"]/g,
@@ -427,6 +441,10 @@ fetch("/api/movies")
   .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`API request failed: ${r.status}`))))
   .then((text) => {
     movies = text.movies;
+    // Keep the API pagination metadata from the initial request. Without this,
+    // the first 24 records are treated as the complete local dataset and the
+    // pager never knows that additional CSV records exist.
+    serverPagination = text;
     movies.forEach(
       (movie) => (movie.consensus = consensusScore(movie, movies)),
     );
